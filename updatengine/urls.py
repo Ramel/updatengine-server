@@ -19,12 +19,14 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         #
 ###############################################################################
 
-from django.urls import include, re_path, reverse_lazy
+from django.urls import include, path, re_path, reverse_lazy
 from django.contrib import admin
 from inventory.views import post
 from django.contrib.admin import site
 import adminactions.actions as actions
 from .views import check_version, ChangePasswordView, ChangePasswordDoneView
+from rest_framework import routers
+from inventory.views import MachinesViewSet
 
 # Import admin module in each installed application
 admin.autodiscover()
@@ -32,6 +34,10 @@ admin.autodiscover()
 # Register all adminactions
 site.add_action(actions.mass_update)
 site.add_action(actions.export_as_csv)
+
+# REST API
+router = routers.DefaultRouter()
+router.register(r'machines', MachinesViewSet)
 
 urlpatterns = [
     re_path(r'^password_change/$', ChangePasswordView.as_view(success_url=reverse_lazy('password_change_done'))),
@@ -41,5 +47,9 @@ urlpatterns = [
     re_path(r'^adminactions/', include('adminactions.urls')),
     re_path(r'^i18n/', include('django.conf.urls.i18n')),
     re_path(r'^check_version/$', check_version, name='latest_version'),
+    re_path(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    re_path(r'^api/', include([
+        path('inventory/', include(router.urls)),
+        ])),
     re_path(r'', admin.site.urls),
 ]

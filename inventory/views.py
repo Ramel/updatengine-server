@@ -31,6 +31,10 @@ from netaddr import IPNetwork, IPAddress
 import sys
 import re
 from django.template import engines
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import viewsets
+from .serializers import MachinesSerializer
+
 
 django_engine = engines['django']
 
@@ -1310,3 +1314,10 @@ def remove_duplicates():
             net.objects.filter(host_id=host_obj.id).delete()
             packagehistory.objects.filter(machine_id=host_obj.id).delete()
             machine.objects.filter(id=host_obj.id).delete()
+
+
+class MachinesViewSet(viewsets.ModelViewSet):
+
+    queryset = machine.objects.all()
+    serializer_class = MachinesSerializer
+    permission_classes = [IsAuthenticated]
